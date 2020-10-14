@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <Presentation />
+  <div>
+    <h2>Skills</h2>
   </div>
 </template>
 

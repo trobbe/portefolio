@@ -1,7 +1,8 @@
 <template>
-  <div class="container">
-    <Presentation />
-  </div>
+  <header>
+    <h1>portefolio</h1>
+    <Nav />
+  </header>
 </template>
 
 <script>
