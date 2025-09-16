@@ -1,0 +1,43 @@
+name: Deploy to Infomaniak (password)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Install rsync & sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync sshpass
+
+      - name: Trust SSH host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # ⚠️ Première mise en place uniquement (ou si package.json change) :
+      - name: Bootstrap remote app (package.json + npm ci --omit=dev)
+        run: |
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm ci --omit=dev"
+
+      - name: Deploy dist/
+        run: |
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/dist/
