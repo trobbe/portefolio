@@ -23,7 +23,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y rsync sshpass
 
-      # Pin de la clé hôte (préféré). Fallback automatique vers ssh-keyscan si le secret est vide.
       - name: Configure known_hosts
         env:
           KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
@@ -35,7 +34,15 @@ jobs:
             ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           fi
 
-      # ⚠️ Première mise en place uniquement (ou si package.json change)
+      # Ensure remote path and dist directory exist
+      - name: Ensure remote path and dist directory exist
+        run: |
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+            -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p ${{ secrets.REMOTE_PATH }}/dist"
+
+      # Première mise en place uniquement (ou si package.json change)
       - name: Bootstrap remote app (package.json + npm ci --omit=dev)
         run: |
           sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az \
