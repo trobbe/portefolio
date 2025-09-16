@@ -34,6 +34,27 @@ jobs:
           else
             ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           fi
+          
+      - name: Verify build artifacts
+        run: |
+          set -euxo pipefail
+          test -d dist || { echo "dist/ n'existe pas (build KO)"; exit 2; }
+          ls -lah dist | head -n 50
+
+      - name: Ensure remote path exists
+        run: |
+          set -euxo pipefail
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+            -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p '${{ secrets.REMOTE_PATH }}/dist' && ls -ld '${{ secrets.REMOTE_PATH }}' '${{ secrets.REMOTE_PATH }}/dist'"
+
+      - name: Deploy dist/ (rsync verbose)
+        run: |
+          set -euxo pipefail
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -azv --delete --partial \
+            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
+            dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/dist/
 
       # ⚠️ Première mise en place uniquement (ou si package.json change)
       - name: Bootstrap remote app (package.json + npm ci --omit=dev)
