@@ -35,6 +35,14 @@ jobs:
             ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           fi
 
+      - name: Ensure remote path exists
+        run: |
+          set -euxo pipefail
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+            -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p '${{ secrets.REMOTE_PATH }}/dist' && ls -ld '${{ secrets.REMOTE_PATH }}' '${{ secrets.REMOTE_PATH }}/dist'"
+
       - name: Print remote pwd & check path
         run: |
           sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
@@ -46,14 +54,6 @@ jobs:
           set -euxo pipefail
           test -d dist || { echo "dist/ n'existe pas (build KO)"; exit 2; }
           ls -lah dist | head -n 50
-
-      - name: Ensure remote path exists
-        run: |
-          set -euxo pipefail
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
-            -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "mkdir -p '${{ secrets.REMOTE_PATH }}/dist' && ls -ld '${{ secrets.REMOTE_PATH }}' '${{ secrets.REMOTE_PATH }}/dist'"
 
       - name: Deploy dist/ (rsync verbose)
         run: |
