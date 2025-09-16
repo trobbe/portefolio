@@ -37,22 +37,44 @@ jobs:
 
       - name: Print remote pwd & check path
         run: |
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "pwd; echo 'REMOTE_PATH=${{ secrets.REMOTE_PATH }}'; ls -ld '${{ secrets.REMOTE_PATH }}' || echo 'REMOTE_PATH introuvable'"
-            
+
+            - name: Verify build artifacts
+        run: |
+          set -euxo pipefail
+          test -d dist || { echo "dist/ n'existe pas (build KO)"; exit 2; }
+          ls -lah dist | head -n 50
+
+      - name: Ensure remote path exists
+        run: |
+          set -euxo pipefail
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+            -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p '${{ secrets.REMOTE_PATH }}/dist' && ls -ld '${{ secrets.REMOTE_PATH }}' '${{ secrets.REMOTE_PATH }}/dist'"
+
+      - name: Deploy dist/ (rsync verbose)
+        run: |
+          set -euxo pipefail
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -azv --delete --partial \
+            -e "ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }}" \
+            dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/dist/
+
+
       # ⚠️ Première mise en place uniquement (ou si package.json change)
       - name: Bootstrap remote app (package.json + npm ci --omit=dev)
         run: |
           sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az \
-            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
+            -e "ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }}" \
             package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
           sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
-            -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+            -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm ci --omit=dev"
 
       - name: Deploy dist/
         run: |
           sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az --delete \
-            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
+            -e "ssh -o StrictHostKeyChecking=accept-new -p ${{ secrets.SSH_PORT }}" \
             dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/dist/
