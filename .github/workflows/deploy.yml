@@ -41,7 +41,7 @@ jobs:
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "pwd; echo 'REMOTE_PATH=${{ secrets.REMOTE_PATH }}'; ls -ld '${{ secrets.REMOTE_PATH }}' || echo 'REMOTE_PATH introuvable'"
 
-            - name: Verify build artifacts
+      - name: Verify build artifacts
         run: |
           set -euxo pipefail
           test -d dist || { echo "dist/ n'existe pas (build KO)"; exit 2; }
