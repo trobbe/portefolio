@@ -23,21 +23,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y rsync sshpass
 
-      - name: Trust SSH host
+      # Pin de la clé hôte (préféré). Fallback automatique vers ssh-keyscan si le secret est vide.
+      - name: Configure known_hosts
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf "%s\n" "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          fi
 
-      # ⚠️ Première mise en place uniquement (ou si package.json change) :
+      # ⚠️ Première mise en place uniquement (ou si package.json change)
       - name: Bootstrap remote app (package.json + npm ci --omit=dev)
         run: |
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az -e "ssh -p ${{ secrets.SSH_PORT }}" \
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az \
+            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
             package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+            -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm ci --omit=dev"
 
       - name: Deploy dist/
         run: |
           sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az --delete \
-            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
             dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/dist/
