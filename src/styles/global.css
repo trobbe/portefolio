@@ -1,17 +1,26 @@
 @import "tailwindcss";
 
 @font-face {
-    font-family: 'Noto Sans';
-    src: url('/public/fonts/NotoSans-VariableFont_wdth\,wght.ttf') format('truetype');
+  font-family: 'Noto Sans';
+  src: url('/fonts/NotoSans-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900; /* plage pour variable font */
+  font-display: swap;
 }
+
 @font-face {
-    font-family: 'PlusJakarta Sans';
-    src: url('/public/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
+
 @font-face {
-    font-family: 'Plus Jakarta Sans Italic';
-    src: url('/public/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf') format('truetype');
-    font-style: italic;
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
 }
 
 @theme {
@@ -29,7 +38,8 @@
 
 @layer base {
     h1 {
-        font-family: var(--font-plus-jakarta-sans-italic);
+        font-family: var(--font-plus-jakarta-sans);
+        font-style: italic;
         font-weight: 700;
         font-size: var(--text-6xl);
         line-height: var(--text-6xl--line-height);
