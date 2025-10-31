@@ -1,14 +1,9 @@
 ---
-import { H1_WORDING, SITE_TITLE } from "../consts";
 import Nav from "./Nav.astro";
+import Socials from "./Socials.astro";
 ---
 
 <header class="bg-primary px-1 py-1.5 flex items-center justify-between border-b-2">
-  <h1>
-    <a href="/" title={SITE_TITLE} class="flex flex-col items-center text-2xl font-bold uppercase max-w-16">
-      <img src="/TR2.png" alt="TR"/>
-      {H1_WORDING}
-    </a>
-  </h1>
   <Nav />
+  <Socials />
 </header>
