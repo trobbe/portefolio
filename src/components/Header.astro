@@ -1,9 +1,32 @@
 ---
 import Nav from "./Nav.astro";
-import Socials from "./Socials.astro";
 ---
 
-<header class="bg-primary px-1 py-1.5 flex items-center justify-between border-b-2">
-  <Nav />
-  <Socials />
+<header class="bg-primary px-1 py-1.5 flex items-center justify-between lg:py-8">
+  <button
+    id="openNav"
+    class="group w-10 h-10 z-30 md:w-20 md:h-20 lg:hidden"
+    type="button"
+    aria-label="Toggle navigation"
+    aria-expanded="false"
+  >
+    <svg id="hamburger" class="Header__toggle-svg" viewBox="0 0 60 40" class="w-full">
+      <g
+        stroke="#100F0D"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path id="top-line" class="[transform-box:fill-box] origin-center group-aria-[expanded=true]:animate-down-rotate group-aria-[expanded=false]:animate-down-rotate-reverse" d="M10,10 L50,10 Z"></path>
+        <path id="middle-line" class="[transform-box:fill-box] origin-center group-aria-[expanded=true]:animate-hide group-aria-[expanded=false]:animate-hide-reverse" d="M10,20 L50,20 Z"></path>
+        <path id="bottom-line" class="[transform-box:fill-box] origin-center group-aria-[expanded=true]:animate-up-rotate group-aria-[expanded=false]:animate-up-rotate-reverse" d="M10,30 L50,30 Z"></path>
+      </g>
+    </svg>
+  </button>
+  <Nav/>
+  <!-- <Socials /> -->
 </header>
+
+<script>
+  import "../ts/menu";
+</script>

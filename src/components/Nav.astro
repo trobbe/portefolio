@@ -1,11 +1,15 @@
 ---
 import HeaderLink from "./HeaderLink.astro";
+
+const { class: className, ...props } = Astro.props;
+const base = "flex flex-col items-center justify-around fixed top-0 left-0 w-full h-screen bg-secondary z-10 lg:static lg:bg-transparent lg:h-auto";
 ---
 
-<nav>
-  <ul class="internal-links">
+<nav class:list={[base, className]} {...props}>
+  <ul class="flex flex-col items-center justify-around gap-10 mx-auto w-[90%] md:w-[70%] lg:flex-row">
     <HeaderLink href="/">Home</HeaderLink>
+    <HeaderLink href="/works">Works</HeaderLink>
+    <HeaderLink href="/contact">Contact</HeaderLink>
     <HeaderLink href="/blog">Blog</HeaderLink>
-    <HeaderLink href="/about">About</HeaderLink>
   </ul>
 </nav>
