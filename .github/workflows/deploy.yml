@@ -43,14 +43,14 @@ jobs:
             "mkdir -p ${{ secrets.REMOTE_PATH }}/dist"
 
       # Première mise en place uniquement (ou si package.json change)
-      - name: Bootstrap remote app (package.json + npm ci --omit=dev)
-        run: |
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az \
-            -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
-            package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
-            -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm i --omit=dev"
+      # - name: Bootstrap remote app (package.json + npm ci --omit=dev)
+      #   run: |
+      #     sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -az \
+      #       -e "ssh -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }}" \
+      #       package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
+      #     sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
+      #       -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
+      #       ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm ci --omit=dev"
 
       - name: Deploy dist/
         run: |
