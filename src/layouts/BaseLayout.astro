@@ -6,12 +6,14 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { ClientRouter } from "astro:transitions";
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const title = Astro.props.title ? `${Astro.props.title } | ${SITE_TITLE}` : SITE_TITLE;
 ---
 
 <!doctype html>
 <html lang="en">
     <head>
-        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+        <BaseHead title={title} description={SITE_DESCRIPTION} />
         <ClientRouter />
     </head>
     <body class="flex justify-between flex-col bg-primary h-screen w-full">
