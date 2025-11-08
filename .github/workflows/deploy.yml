@@ -50,7 +50,7 @@ jobs:
             package.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_PATH }}/
           sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh \
             -o StrictHostKeyChecking=yes -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm ci --omit=dev"
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.REMOTE_PATH }} && npm i --omit=dev"
 
       - name: Deploy dist/
         run: |
